@@ -30,7 +30,7 @@ The value can contain nginx variables.
 ```
 http {
 	json_var $output {
-		timestamp $json_time_gmt;
+		timestamp $time_local;
 		remoteAddr $remote_addr;
 		xForwardedFor $http_x_forwarded_for;
 		userAgent $http_user_agent;
@@ -46,18 +46,13 @@ http {
 Hitting `http://domain/get_json/?key1=value1&key2=value2` can return a json like:
 ```
 {
-	"timestamp": "2017-06-11T11:50:43Z",
+	"timestamp": "21/Jul/2017:12:44:18 -0400",
 	"remoteAddr": "127.0.0.1",
 	"xForwardedFor": "",
 	"userAgent": "curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3",
 	"params": "key1=value1&key2=value2"
 }
 ```
-
-## Nginx variables
-
-The module adds the following nginx variables:
-* `$json_time_gmt` - contains the current time in GMT timezone, using the format `YYYY-MM-DDThh:mm:ssZ`, e.g. `2017-06-11T11:23:54Z`.
 
 ## Copyright & License
 

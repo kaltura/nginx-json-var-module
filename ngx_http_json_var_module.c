@@ -2,10 +2,6 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
-// constants
-#define JSON_TIMESTAMP_LEN sizeof("2000-01-01T00:00:00Z")
-#define JSON_TIMESTAMP_FORMAT "%Y-%m-%dT%H:%M:%SZ"
-
 // typedefs
 typedef struct {
 	ngx_str_t name;
@@ -29,7 +25,6 @@ typedef struct {
 
 // forward decls
 static char *ngx_http_json_var_json_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static ngx_int_t ngx_http_json_var_add_variables(ngx_conf_t *cf);
 
 // globals
 static ngx_command_t ngx_http_json_var_commands[] = {
@@ -45,7 +40,7 @@ static ngx_command_t ngx_http_json_var_commands[] = {
 };
 
 static ngx_http_module_t ngx_http_json_var_module_ctx = {
-	ngx_http_json_var_add_variables,	/* preconfiguration */
+    NULL,								/* preconfiguration */
     NULL,								/* postconfiguration */
 
     NULL,								/* create main configuration */
@@ -72,55 +67,6 @@ ngx_module_t ngx_http_json_var_module = {
     NULL,								/* exit master */
     NGX_MODULE_V1_PADDING
 };
-
-static ngx_str_t time_var_name = ngx_string("json_time_gmt");
-
-static ngx_int_t
-ngx_http_json_set_time_var(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
-{
-	struct tm tm;
-	time_t now;
-
-	now = ngx_time();
-	ngx_libc_gmtime(now, &tm);
-
-	v->data = ngx_pnalloc(r->pool, JSON_TIMESTAMP_LEN);
-	if (v->data == NULL)
-	{
-		return NGX_ERROR;
-	}
-
-	v->len = strftime(
-		(char*)v->data, 
-		JSON_TIMESTAMP_LEN,
-		(char *)JSON_TIMESTAMP_FORMAT, 
-		&tm);
-	if (v->len == 0)
-	{
-		return NGX_ERROR;
-	}
-
-	v->valid = 1;
-	v->no_cacheable = 1;
-	v->not_found = 0;
-
-	return NGX_OK;
-}
-
-static ngx_int_t
-ngx_http_json_var_add_variables(ngx_conf_t *cf)
-{
-	ngx_http_variable_t  *var;
-
-	var = ngx_http_add_variable(cf, &time_var_name, NGX_HTTP_VAR_NOCACHEABLE);
-	if (var == NULL)
-	{
-		return NGX_ERROR;
-	}
-
-	var->get_handler = ngx_http_json_set_time_var;
-	return NGX_OK;
-}
 
 static char *
 ngx_http_json_var_json(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
